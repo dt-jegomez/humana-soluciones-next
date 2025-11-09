@@ -3,10 +3,14 @@ import { PropertyForm } from '@/components/PropertyForm';
 
 export default function NewPropertyPage() {
   return (
-    <div className="space-y-6">
-      <nav className="text-sm text-slate-600">
-        <Link href="/" className="text-blue-600">
-          ← Volver al listado
+    <div className="space-y-8">
+      <nav>
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-sm text-slate-500 transition hover:text-slate-900"
+        >
+          <span aria-hidden>←</span>
+          Volver al listado
         </Link>
       </nav>
       <PropertyForm />

@@ -33,10 +33,14 @@ export function DeletePropertyButton({ propertyId }: DeletePropertyButtonProps) 
 
   return (
     <div className="space-y-2">
-      <button type="button" className="secondary" onClick={handleDelete} disabled={loading}>
+      <button type="button" className="btn-secondary" onClick={handleDelete} disabled={loading}>
         {loading ? 'Eliminando...' : 'Eliminar inmueble'}
       </button>
-      {error && <p className="text-xs text-blue-600">{error}</p>}
+      {error && (
+        <p className="text-xs font-medium text-rose-600">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

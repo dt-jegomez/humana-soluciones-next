@@ -75,19 +75,20 @@ export function FilterPanel({ defaultFilters, onChange, loadCities }: FilterPane
   }
 
   return (
-    <section className="card space-y-6">
-      <header>
-        <h2 className="text-xl font-bold text-slate-800">Filtrar inmuebles</h2>
-        <p className="text-sm text-slate-600">
+    <section className="card space-y-8">
+      <header className="space-y-2">
+        <h2 className="text-xl font-semibold text-slate-900">Filtrar inmuebles</h2>
+        <p className="text-sm text-slate-500">
           Ajusta los criterios para encontrar el inmueble que necesitas.
         </p>
       </header>
       <form className="space-y-6" onSubmit={handleSubmit}>
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid gap-4 md:grid-cols-2">
           <div className="field-group">
             <label htmlFor="city">Ciudad</label>
             <select
               id="city"
+              className="w-full"
               value={filters.city ?? ''}
               onChange={(event) => {
                 const value = event.target.value || undefined;
@@ -105,12 +106,17 @@ export function FilterPanel({ defaultFilters, onChange, loadCities }: FilterPane
                   </option>
                 ))}
             </select>
-            {error && <p className="text-xs text-blue-600">{error}</p>}
+            {error && (
+              <p className="text-xs font-medium text-rose-600">
+                {error}
+              </p>
+            )}
           </div>
           <div className="field-group">
             <label htmlFor="consignation">Tipo de consignación</label>
             <select
               id="consignation"
+              className="w-full"
               value={filters.consignation_type ?? ''}
               onChange={(event) => {
                 const value = (event.target.value || undefined) as PropertyFilters['consignation_type'];
@@ -125,11 +131,12 @@ export function FilterPanel({ defaultFilters, onChange, loadCities }: FilterPane
             </select>
           </div>
         </div>
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid gap-4 md:grid-cols-2">
           <div className="field-group">
             <label htmlFor="min_price">Precio mínimo (COP)</label>
             <input
               id="min_price"
+              className="w-full"
               type="number"
               min={0}
               value={filters.min_price ?? ''}
@@ -148,6 +155,7 @@ export function FilterPanel({ defaultFilters, onChange, loadCities }: FilterPane
             <label htmlFor="max_price">Precio máximo (COP)</label>
             <input
               id="max_price"
+              className="w-full"
               type="number"
               min={0}
               value={filters.max_price ?? ''}
@@ -163,16 +171,20 @@ export function FilterPanel({ defaultFilters, onChange, loadCities }: FilterPane
             />
           </div>
         </div>
-        <div className="space-y-4">
-          <p className="font-semibold text-slate-700">Habitaciones</p>
-          <div className="flex flex-wrap gap-2">
+        <div className="space-y-3">
+          <p className="text-sm font-semibold text-slate-700">Habitaciones</p>
+          <div className="flex flex-wrap gap-3">
             {BEDROOM_OPTIONS.map((value) => {
               const active = selectedBedrooms.has(value);
               return (
                 <button
                   key={value}
                   type="button"
-                  className={`badge ${active ? 'badge-blue' : 'border border-slate-200 bg-white text-slate-600'}`}
+                  className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+                    active
+                      ? 'border-brand-300 bg-brand-50 text-brand-700 shadow-sm'
+                      : 'border-slate-200 text-slate-600 hover:border-brand-200 hover:text-brand-600'
+                  }`}
                   onClick={() => toggleBedroom(value)}
                 >
                   {value} {value === 1 ? 'habitación' : 'habitaciones'}
@@ -181,11 +193,11 @@ export function FilterPanel({ defaultFilters, onChange, loadCities }: FilterPane
             })}
           </div>
         </div>
-        <div className="flex gap-4">
-          <button type="submit" className="primary">
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <button type="submit" className="btn-primary">
             Aplicar filtros
           </button>
-          <button type="button" className="secondary" onClick={handleReset}>
+          <button type="button" className="btn-secondary" onClick={handleReset}>
             Limpiar
           </button>
         </div>

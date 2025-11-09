@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FilterPanel } from '@/components/FilterPanel';
 import { PropertyCard } from '@/components/PropertyCard';
 import { CityOption, fetchCities, fetchProperties } from '@/lib/api';
-import type { PaginatedResponse, PropertyFilters } from '@/lib/types';
+import type { PaginatedResponse, Property, PropertyFilters } from '@/lib/types';
 
 const INITIAL_FILTERS: PropertyFilters = {
   per_page: 12,
@@ -50,53 +50,64 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="space-y-8">
-      <section className="space-y-2">
-        <h1 className="text-2xl font-bold text-slate-900">Inventario de inmuebles</h1>
-        <p className="text-sm text-slate-600">
-          Consulta, filtra y administra el portafolio inmobiliario disponible para arriendo y
-          venta.
+    <div className="space-y-10">
+      <section className="space-y-3">
+        <span className="inline-flex items-center rounded-full bg-slate-200/70 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600">
+          Panel de gestión
+        </span>
+        <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
+          Inventario de inmuebles
+        </h1>
+        <p className="max-w-2xl text-sm text-slate-600">
+          Consulta y administra el portafolio inmobiliario disponible. Utiliza los filtros para encontrar rápidamente la propiedad adecuada.
         </p>
       </section>
 
       <FilterPanel defaultFilters={filters} onChange={handleFiltersChange} loadCities={citiesLoader} />
 
-      <section className="space-y-4">
-        <header className="flex items-center justify-between">
+      <section className="space-y-6">
+        <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-slate-800">
+            <h2 className="text-xl font-semibold text-slate-900">
               {loading ? 'Cargando inmuebles...' : 'Resultados'}
             </h2>
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-slate-500">
               {response?.meta.total ?? 0} inmuebles encontrados
             </p>
           </div>
-          <div className="text-sm text-slate-600">
-            Página {currentPage} de {totalPages}
+          <div className="flex items-center gap-2 text-sm text-slate-500">
+            <span className="hidden sm:inline">Página</span>
+            <span className="rounded-full bg-slate-200/70 px-3 py-1 font-semibold text-slate-700">
+              {currentPage}
+            </span>
+            <span className="text-muted">de {totalPages}</span>
           </div>
         </header>
 
-        {error && <p className="text-sm text-blue-600">{error}</p>}
-
-        {!loading && response && response.data.length === 0 && (
-          <p className="text-sm text-slate-600">
-            No se encontraron inmuebles con los filtros seleccionados. Ajusta los criterios e
-            inténtalo nuevamente.
+        {error && (
+          <p className="rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-600">
+            {error}
           </p>
         )}
 
-        <div className="grid grid-3">
+        {!loading && response && response.data.length === 0 && (
+          <p className="rounded-2xl border border-slate-200/80 bg-white/70 px-4 py-4 text-sm text-slate-600">
+            No se encontraron inmuebles con los filtros seleccionados. Ajusta los criterios e inténtalo nuevamente.
+          </p>
+        )}
+
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
           {response?.data.map((property) => (
             <PropertyCard key={property.id} property={property} />
           ))}
         </div>
 
-        {loading && <p className="text-sm text-slate-600">Actualizando resultados...</p>}
+        {loading && <p className="text-sm text-slate-500">Actualizando resultados...</p>}
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-between border border-slate-200 bg-white p-4 rounded-lg">
+          <div className="card flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <button
-              className="secondary"
+              className="btn-secondary"
               disabled={currentPage <= 1}
               onClick={() =>
                 handleFiltersChange({
@@ -107,11 +118,11 @@ export default function HomePage() {
             >
               Anterior
             </button>
-            <div className="text-sm text-slate-600">
+            <div className="text-sm text-slate-500">
               Mostrando página {currentPage} de {totalPages}
             </div>
             <button
-              className="secondary"
+              className="btn-secondary"
               disabled={currentPage >= totalPages}
               onClick={() =>
                 handleFiltersChange({

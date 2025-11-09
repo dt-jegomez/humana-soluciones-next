@@ -54,50 +54,54 @@ export default async function PropertyDetailPage({ params }: PropertyDetailPageP
       : `Precio de venta: ${formatCurrency(property.sale_price)}`;
 
   return (
-    <div className="space-y-6">
-      <nav className="text-sm text-slate-600">
-        <Link href="/" className="text-blue-600">
-          ← Volver al listado
+    <div className="space-y-10">
+      <nav>
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-sm text-slate-500 transition hover:text-slate-900"
+        >
+          <span aria-hidden>←</span>
+          Volver al listado
         </Link>
       </nav>
 
-      <header className="space-y-2">
-        <span className={`badge ${property.consignation_type === 'rent' ? 'badge-blue' : 'badge-amber'}`}>
+      <header className="space-y-3">
+        <span className={`badge ${property.consignation_type === 'rent' ? 'badge-rent' : 'badge-sale'}`}>
           {property.consignation_type === 'rent' ? 'Arriendo' : 'Venta'}
         </span>
-        <h1 className="text-3xl font-bold text-slate-900">{property.title}</h1>
-        <p className="text-sm text-slate-600">{property.address}</p>
+        <h1 className="text-3xl font-semibold text-slate-900">{property.title}</h1>
+        <p className="text-sm text-slate-500">{property.address}</p>
       </header>
 
-      <section className="grid md:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          <div className="rounded-lg bg-white p-4 shadow-md">
-            <h2 className="text-lg font-semibold text-slate-800">Descripción</h2>
-            <p className="mt-2 text-sm leading-relaxed text-slate-600">{property.description}</p>
+      <section className="grid gap-8 lg:grid-cols-[1.15fr_1fr]">
+        <div className="space-y-5">
+          <div className="card space-y-3">
+            <h2 className="text-lg font-semibold text-slate-900">Descripción</h2>
+            <p className="text-sm leading-relaxed text-slate-600">{property.description}</p>
           </div>
-          <div className="rounded-lg bg-white p-4 shadow-md">
-            <h2 className="text-lg font-semibold text-slate-800">Características</h2>
-            <dl className="grid grid-cols-2 gap-4 text-sm text-slate-600">
-              <div>
+          <div className="card space-y-4">
+            <h2 className="text-lg font-semibold text-slate-900">Características</h2>
+            <dl className="grid gap-4 text-sm text-slate-600 sm:grid-cols-2">
+              <div className="space-y-1">
                 <dt className="font-semibold text-slate-700">Ciudad</dt>
-                <dd>{property.city}</dd>
+                <dd className="text-slate-900">{property.city}</dd>
               </div>
-              <div>
+              <div className="space-y-1">
                 <dt className="font-semibold text-slate-700">Habitaciones</dt>
-                <dd>{property.bedrooms}</dd>
+                <dd className="text-slate-900">{property.bedrooms}</dd>
               </div>
-              <div>
+              <div className="space-y-1">
                 <dt className="font-semibold text-slate-700">Baños</dt>
-                <dd>{property.bathrooms}</dd>
+                <dd className="text-slate-900">{property.bathrooms}</dd>
               </div>
-              <div>
+              <div className="space-y-1">
                 <dt className="font-semibold text-slate-700">Área</dt>
-                <dd>{property.area} m²</dd>
+                <dd className="text-slate-900">{property.area} m²</dd>
               </div>
             </dl>
           </div>
-          <div className="rounded-lg bg-white p-4 shadow-md space-y-2">
-            <h2 className="text-lg font-semibold text-slate-800">Condiciones económicas</h2>
+          <div className="card space-y-2">
+            <h2 className="text-lg font-semibold text-slate-900">Condiciones económicas</h2>
             <p className="text-sm text-slate-600">{priceLabel}</p>
             {property.rent_price && property.sale_price && (
               <p className="text-xs text-slate-500">
@@ -105,15 +109,18 @@ export default async function PropertyDetailPage({ params }: PropertyDetailPageP
               </p>
             )}
           </div>
-          <div className="rounded-lg bg-white p-4 shadow-md text-sm text-slate-600">
+          <div className="card text-sm text-slate-500">
             <p>Creado: {formatDate(property.created_at)}</p>
             <p>Actualizado: {formatDate(property.updated_at)}</p>
           </div>
         </div>
-        <div className="space-y-4">
+        <div className="space-y-5">
           {property.images && property.images.length > 0 ? (
             property.images.map((image, index) => (
-              <div key={image.id ?? index} className="relative overflow-hidden rounded-lg bg-slate-50" style={{ paddingTop: '60%' }}>
+              <div
+                key={image.id ?? index}
+                className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-slate-200/70 bg-slate-100"
+              >
                 <Image
                   src={image.url}
                   alt={`${property.title} - Imagen ${index + 1}`}
@@ -124,15 +131,15 @@ export default async function PropertyDetailPage({ params }: PropertyDetailPageP
               </div>
             ))
           ) : (
-            <div className="rounded-lg bg-white p-6 text-center text-sm text-slate-500">
+            <div className="card text-center text-sm text-slate-500">
               No hay imágenes registradas para este inmueble.
             </div>
           )}
         </div>
       </section>
 
-      <div className="flex flex-wrap gap-4">
-        <Link href={`/properties/${property.id}/edit`} className="primary">
+      <div className="flex flex-wrap gap-3">
+        <Link href={`/properties/${property.id}/edit`} className="btn-primary">
           Editar inmueble
         </Link>
         <DeletePropertyButton propertyId={property.id} />

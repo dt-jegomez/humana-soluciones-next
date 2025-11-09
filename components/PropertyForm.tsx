@@ -141,26 +141,35 @@ export function PropertyForm({ property }: PropertyFormProps) {
   }
 
   return (
-    <form className="card space-y-6" onSubmit={handleSubmit}>
+    <form className="card space-y-8" onSubmit={handleSubmit}>
       <header className="space-y-2">
-        <h1 className="text-xl font-bold text-slate-800">
+        <h1 className="text-2xl font-semibold text-slate-900">
           {property ? 'Editar inmueble' : 'Registrar nuevo inmueble'}
         </h1>
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-slate-500">
           Completa la información principal, precios y galería para la publicación.
         </p>
       </header>
 
-      {error && <p className="text-sm text-blue-600">{error}</p>}
-      {successMessage && <p className="text-sm text-blue-600">{successMessage}</p>}
+      {error && (
+        <p className="rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-600">
+          {error}
+        </p>
+      )}
+      {successMessage && (
+        <p className="rounded-2xl border border-brand-100 bg-brand-50 px-4 py-3 text-sm text-brand-700">
+          {successMessage}
+        </p>
+      )}
 
       <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-slate-800">Información básica</h2>
-        <div className="grid md:grid-cols-2 gap-4">
+        <h2 className="text-lg font-semibold text-slate-900">Información básica</h2>
+        <div className="grid gap-4 md:grid-cols-2">
           <div className="field-group">
             <label htmlFor="title">Título</label>
             <input
               id="title"
+              className="w-full"
               required
               value={form.title}
               onChange={(event) => updateField('title', event.target.value)}
@@ -170,6 +179,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
             <label htmlFor="city">Ciudad</label>
             <select
               id="city"
+              className="w-full"
               required
               value={form.city}
               onChange={(event) => updateField('city', event.target.value)}
@@ -189,6 +199,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
           <label htmlFor="address">Dirección</label>
           <input
             id="address"
+            className="w-full"
             required
             value={form.address}
             onChange={(event) => updateField('address', event.target.value)}
@@ -198,6 +209,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
           <label htmlFor="description">Descripción</label>
           <textarea
             id="description"
+            className="w-full min-h-[120px]"
             rows={4}
             required
             value={form.description}
@@ -207,12 +219,13 @@ export function PropertyForm({ property }: PropertyFormProps) {
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-slate-800">Características</h2>
-        <div className="grid md:grid-cols-3 gap-4">
+        <h2 className="text-lg font-semibold text-slate-900">Características</h2>
+        <div className="grid gap-4 md:grid-cols-3">
           <div className="field-group">
             <label htmlFor="bedrooms">Habitaciones</label>
             <input
               id="bedrooms"
+              className="w-full"
               type="number"
               min={0}
               value={form.bedrooms}
@@ -223,6 +236,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
             <label htmlFor="bathrooms">Baños</label>
             <input
               id="bathrooms"
+              className="w-full"
               type="number"
               min={0}
               value={form.bathrooms}
@@ -233,6 +247,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
             <label htmlFor="area">Área (m²)</label>
             <input
               id="area"
+              className="w-full"
               type="number"
               min={0}
               value={form.area}
@@ -243,12 +258,13 @@ export function PropertyForm({ property }: PropertyFormProps) {
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-slate-800">Condiciones económicas</h2>
-        <div className="grid md:grid-cols-3 gap-4">
+        <h2 className="text-lg font-semibold text-slate-900">Condiciones económicas</h2>
+        <div className="grid gap-4 md:grid-cols-3">
           <div className="field-group">
             <label htmlFor="consignation_type">Tipo de consignación</label>
             <select
               id="consignation_type"
+              className="w-full"
               value={form.consignation_type}
               onChange={(event) => updateField('consignation_type', event.target.value as ConsignationType)}
             >
@@ -260,6 +276,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
             <label htmlFor="rent_price">Precio de arriendo (COP)</label>
             <input
               id="rent_price"
+              className="w-full"
               type="number"
               min={0}
               value={form.rent_price ?? ''}
@@ -272,6 +289,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
             <label htmlFor="sale_price">Precio de venta (COP)</label>
             <input
               id="sale_price"
+              className="w-full"
               type="number"
               min={0}
               value={form.sale_price ?? ''}
@@ -288,27 +306,31 @@ export function PropertyForm({ property }: PropertyFormProps) {
       </section>
 
       <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-800">Galería (URLs públicas)</h2>
-          <button type="button" className="secondary" onClick={addImageField}>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="text-lg font-semibold text-slate-900">Galería (URLs públicas)</h2>
+          <button type="button" className="btn-secondary" onClick={addImageField}>
             Añadir imagen
           </button>
         </div>
         <div className="space-y-4">
           {form.images.map((url, index) => (
-            <div key={index} className="border border-dashed border-slate-200 rounded-lg p-4 space-y-2">
+            <div
+              key={index}
+              className="space-y-3 rounded-2xl border border-dashed border-slate-300/70 bg-white/70 p-4"
+            >
               <div className="field-group">
                 <label htmlFor={`image-${index}`}>Imagen #{index + 1}</label>
                 <input
                   id={`image-${index}`}
+                  className="w-full"
                   placeholder="https://..."
                   value={url}
                   onChange={(event) => updateImage(index, event.target.value)}
                 />
               </div>
               {form.images.length > 1 && (
-                <div className="text-right">
-                  <button type="button" className="secondary" onClick={() => removeImageField(index)}>
+                <div className="flex justify-end">
+                  <button type="button" className="btn-secondary" onClick={() => removeImageField(index)}>
                     Eliminar
                   </button>
                 </div>
@@ -318,11 +340,11 @@ export function PropertyForm({ property }: PropertyFormProps) {
         </div>
       </section>
 
-      <div className="flex gap-4">
-        <button type="submit" className="primary" disabled={submitting}>
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <button type="submit" className="btn-primary" disabled={submitting}>
           {submitting ? 'Guardando...' : 'Guardar'}
         </button>
-        <button type="button" className="secondary" onClick={() => router.back()}>
+        <button type="button" className="btn-secondary" onClick={() => router.back()}>
           Cancelar
         </button>
       </div>

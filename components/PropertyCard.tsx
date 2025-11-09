@@ -23,56 +23,56 @@ export function PropertyCard({ property }: PropertyCardProps) {
       : `Venta: ${formatCurrency(property.sale_price)}`;
 
   return (
-    <article className="card space-y-4">
-      <div className="relative w-full overflow-hidden rounded-lg bg-slate-50" style={{ paddingTop: '60%' }}>
+    <article className="card flex h-full flex-col gap-5">
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-slate-100">
         {cover ? (
           <Image
             src={cover}
             alt={property.title}
             fill
-            className="object-cover"
+            className="object-cover transition duration-300 hover:scale-105"
             sizes="(max-width: 768px) 100vw, 33vw"
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-sm text-slate-500">
-            Sin imagen
+            Sin imagen disponible
           </div>
         )}
       </div>
-      <div className="flex items-center justify-between">
-        <span className={`badge ${property.consignation_type === 'rent' ? 'badge-blue' : 'badge-amber'}`}>
+      <div className="flex items-center justify-between text-sm">
+        <span className={`badge ${property.consignation_type === 'rent' ? 'badge-rent' : 'badge-sale'}`}>
           {property.consignation_type === 'rent' ? 'Arriendo' : 'Venta'}
         </span>
-        <span className="text-sm text-slate-600">{property.city}</span>
+        <span className="flex items-center gap-1 text-slate-500">
+          <span className="h-2 w-2 rounded-full bg-brand-400" />
+          {property.city}
+        </span>
       </div>
-      <header>
-        <h3 className="text-lg font-semibold text-slate-800">{property.title}</h3>
-        <p className="text-sm text-slate-600">{property.address}</p>
+      <header className="space-y-1">
+        <h3 className="text-lg font-semibold text-slate-900">{property.title}</h3>
+        <p className="text-sm text-slate-500">{property.address}</p>
       </header>
-      <p className="text-sm text-slate-600 line-clamp-3">{property.description}</p>
-      <dl className="grid grid-cols-3 gap-2 text-center text-xs text-slate-600">
-        <div className="rounded-lg bg-slate-50 p-2">
+      <p className="text-sm leading-relaxed text-slate-600 line-clamp-3">{property.description}</p>
+      <dl className="grid grid-cols-3 gap-3 text-center text-xs text-slate-600">
+        <div className="rounded-2xl bg-slate-100/80 p-3">
           <dt className="font-semibold text-slate-700">Habitaciones</dt>
-          <dd>{property.bedrooms}</dd>
+          <dd className="mt-1 text-base font-medium text-slate-900">{property.bedrooms}</dd>
         </div>
-        <div className="rounded-lg bg-slate-50 p-2">
+        <div className="rounded-2xl bg-slate-100/80 p-3">
           <dt className="font-semibold text-slate-700">Baños</dt>
-          <dd>{property.bathrooms}</dd>
+          <dd className="mt-1 text-base font-medium text-slate-900">{property.bathrooms}</dd>
         </div>
-        <div className="rounded-lg bg-slate-50 p-2">
+        <div className="rounded-2xl bg-slate-100/80 p-3">
           <dt className="font-semibold text-slate-700">Área</dt>
-          <dd>{property.area} m²</dd>
+          <dd className="mt-1 text-base font-medium text-slate-900">{property.area} m²</dd>
         </div>
       </dl>
-      <p className="font-semibold text-slate-800">{priceLabel}</p>
-      <div className="flex gap-3">
-        <Link href={`/properties/${property.id}`} className="primary">
+      <p className="text-base font-semibold text-slate-900">{priceLabel}</p>
+      <div className="mt-auto flex flex-col gap-3 sm:flex-row">
+        <Link href={`/properties/${property.id}`} className="btn-primary">
           Ver detalle
         </Link>
-        <Link
-          href={`/properties/${property.id}/edit`}
-          className="secondary"
-        >
+        <Link href={`/properties/${property.id}/edit`} className="btn-secondary">
           Editar
         </Link>
       </div>
