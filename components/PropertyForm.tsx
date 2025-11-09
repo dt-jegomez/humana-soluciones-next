@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { CityOption, createProperty, fetchCities, updateProperty } from '@/lib/api';
+import { createProperty, fetchCities, updateProperty } from '@/lib/api';
 import type { ConsignationType, Property } from '@/lib/types';
+import { CitySelect } from './CitySelect';
 
 interface PropertyFormProps {
   property?: Property;
@@ -55,29 +56,9 @@ export function PropertyForm({ property }: PropertyFormProps) {
       images: property.images?.length ? property.images.map((image) => image.url) : ['']
     };
   });
-  const [cities, setCities] = useState<CityOption[]>([]);
-  const [loadingCities, setLoadingCities] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function loadCities() {
-      try {
-        setLoadingCities(true);
-        setError(null);
-        const result = await fetchCities();
-        setCities(result);
-      } catch (err) {
-        console.error(err);
-        setError('No fue posible obtener las ciudades.');
-      } finally {
-        setLoadingCities(false);
-      }
-    }
-
-    loadCities();
-  }, []);
 
   function updateField<K extends keyof FormState>(field: K, value: FormState[K]) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -175,25 +156,15 @@ export function PropertyForm({ property }: PropertyFormProps) {
               onChange={(event) => updateField('title', event.target.value)}
             />
           </div>
-          <div className="field-group">
-            <label htmlFor="city">Ciudad</label>
-            <select
-              id="city"
-              className="w-full"
-              required
-              value={form.city}
-              onChange={(event) => updateField('city', event.target.value)}
-            >
-              <option value="">Selecciona</option>
-              {loadingCities && <option>Cargando ciudades...</option>}
-              {!loadingCities &&
-                cities.map((city) => (
-                  <option key={city.id} value={city.name}>
-                    {city.name}
-                  </option>
-                ))}
-            </select>
-          </div>
+          <CitySelect
+            label="Ciudad"
+            query={form.city}
+            selectedValue={form.city}
+            placeholder="Escribe el nombre de la ciudad"
+            onQueryChange={(value) => updateField('city', value)}
+            loadCities={fetchCities}
+            required
+          />
         </div>
         <div className="field-group">
           <label htmlFor="address">Dirección</label>

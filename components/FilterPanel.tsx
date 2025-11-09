@@ -1,44 +1,21 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { CityOption } from '@/lib/api';
 import type { PropertyFilters } from '@/lib/types';
+import type { CityOption } from '@/lib/api';
+import { CitySelect } from './CitySelect';
 
 interface FilterPanelProps {
   defaultFilters?: PropertyFilters;
   onChange: (filters: PropertyFilters) => void;
-  loadCities: () => Promise<CityOption[]>;
+  loadCities: (search?: string) => Promise<CityOption[]>;
 }
 
 const BEDROOM_OPTIONS = [1, 2, 3, 4, 5];
 
 export function FilterPanel({ defaultFilters, onChange, loadCities }: FilterPanelProps) {
   const [filters, setFilters] = useState<PropertyFilters>(defaultFilters ?? {});
-  const [cities, setCities] = useState<CityOption[]>([]);
-  const [loadingCities, setLoadingCities] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    setFilters((current) => ({ ...current, ...defaultFilters }));
-  }, [defaultFilters]);
-
-  useEffect(() => {
-    async function fetchCities() {
-      try {
-        setLoadingCities(true);
-        setError(null);
-        const result = await loadCities();
-        setCities(result);
-      } catch (err) {
-        console.error(err);
-        setError('No fue posible obtener el listado de ciudades.');
-      } finally {
-        setLoadingCities(false);
-      }
-    }
-
-    fetchCities();
-  }, [loadCities]);
+  const [cityFilter, setCityFilter] = useState(defaultFilters?.city ?? '');
 
   const selectedBedrooms = useMemo(() => new Set(filters.bedrooms ?? []), [filters.bedrooms]);
 
@@ -70,6 +47,7 @@ export function FilterPanel({ defaultFilters, onChange, loadCities }: FilterPane
       per_page: filters.per_page ?? 12,
       page: 1
     };
+    setCityFilter('');
     setFilters(resetFilters);
     onChange(resetFilters);
   }
@@ -84,34 +62,25 @@ export function FilterPanel({ defaultFilters, onChange, loadCities }: FilterPane
       </header>
       <form className="space-y-6" onSubmit={handleSubmit}>
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="field-group">
-            <label htmlFor="city">Ciudad</label>
-            <select
-              id="city"
-              className="w-full"
-              value={filters.city ?? ''}
-              onChange={(event) => {
-                const value = event.target.value || undefined;
-                const updated = { ...filters, city: value, page: 1 };
-                setFilters(updated);
-                onChange(updated);
-              }}
-            >
-              <option value="">Todas</option>
-              {loadingCities && <option>Cargando ciudades...</option>}
-              {!loadingCities &&
-                cities.map((city) => (
-                  <option key={city.id} value={city.name}>
-                    {city.name}
-                  </option>
-                ))}
-            </select>
-            {error && (
-              <p className="text-xs font-medium text-rose-600">
-                {error}
-              </p>
-            )}
-          </div>
+          <CitySelect
+            label="Ciudad"
+            query={cityFilter}
+            onQueryChange={(value) => setCityFilter(value)}
+            onSelect={(value) => {
+              const nextCity = value || undefined;
+              const updated = { ...filters, city: nextCity, page: 1 };
+              setFilters(updated);
+              setCityFilter(value ?? '');
+              onChange(updated);
+            }}
+            selectedValue={filters.city ?? ''}
+            loadCities={loadCities}
+            placeholder="Filtrar escribiendo el nombre"
+            allowClear
+            clearLabel="Todas"
+            helperText="Filtra escribiendo el nombre de la ciudad."
+            maxSuggestions={5}
+          />
           <div className="field-group">
             <label htmlFor="consignation">Tipo de consignación</label>
             <select

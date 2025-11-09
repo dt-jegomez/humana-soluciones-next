@@ -45,8 +45,8 @@ export default function HomePage() {
     setFilters((current) => ({ ...current, ...next }));
   }
 
-  const citiesLoader = useCallback(async (): Promise<CityOption[]> => {
-    return fetchCities();
+  const citiesLoader = useCallback(async (search?: string): Promise<CityOption[]> => {
+    return fetchCities(search);
   }, []);
 
   return (

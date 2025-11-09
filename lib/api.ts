@@ -1,6 +1,20 @@
 import { ConsignationType, PaginatedResponse, Property, PropertyFilters } from './types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000';
+const COLOMBIA_CITY_API_URL = 'https://api-colombia.com/api/v1/City/';
+
+export interface CityOption {
+  id: string;
+  name: string;
+}
+
+interface ColombiaCityResponse {
+  id?: string | number;
+  name?: string;
+}
+
+let cachedCityOptions: CityOption[] | null = null;
+let cityFetchPromise: Promise<CityOption[]> | null = null;
 
 function buildQuery(filters: PropertyFilters): string {
   const params = new URLSearchParams();
@@ -103,12 +117,63 @@ export async function deleteProperty(id: number): Promise<void> {
   });
 }
 
-export interface CityOption {
-  id: string;
-  name: string;
+async function fetchCityCatalog(): Promise<CityOption[]> {
+  if (cachedCityOptions) {
+    return cachedCityOptions;
+  }
+
+  if (!cityFetchPromise) {
+    cityFetchPromise = (async () => {
+      const response = await fetch(COLOMBIA_CITY_API_URL, {
+        headers: {
+          Accept: 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(errorMessage || 'Error al obtener el catálogo de ciudades.');
+      }
+
+      const payload = (await response.json()) as unknown;
+      const normalized = Array.isArray(payload)
+        ? (payload
+            .map((item) => {
+              if (!item || typeof item !== 'object') {
+                return null;
+              }
+              const { id, name } = item as ColombiaCityResponse;
+              if (!name) {
+                return null;
+              }
+              return {
+                id: id !== undefined && id !== null ? String(id) : name,
+                name
+              };
+            })
+            .filter(Boolean) as CityOption[])
+        : [];
+
+      cachedCityOptions = normalized;
+      return normalized;
+    })().finally(() => {
+      cityFetchPromise = null;
+    });
+  }
+
+  return cityFetchPromise;
 }
 
-export async function fetchCities(): Promise<CityOption[]> {
-  const data = await http<{ data: CityOption[] }>(`/api/catalog/cities`);
-  return data.data;
+export async function fetchCities(search?: string): Promise<CityOption[]> {
+  const cities = await fetchCityCatalog();
+  if (!search) {
+    return cities;
+  }
+
+  const normalizedSearch = search.trim().toLowerCase();
+  if (!normalizedSearch) {
+    return cities;
+  }
+
+  return cities.filter((city) => city.name.toLowerCase().includes(normalizedSearch));
 }
