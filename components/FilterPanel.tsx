@@ -12,6 +12,9 @@ interface FilterPanelProps {
 }
 
 const BEDROOM_OPTIONS = [1, 2, 3, 4, 5];
+const CITY_MAX_LENGTH = 255;
+const PRICE_MIN = 0;
+const PRICE_MAX = 999999999999.99;
 
 export function FilterPanel({ defaultFilters, onChange, loadCities }: FilterPanelProps) {
   const [filters, setFilters] = useState<PropertyFilters>(defaultFilters ?? {});
@@ -80,6 +83,7 @@ export function FilterPanel({ defaultFilters, onChange, loadCities }: FilterPane
             clearLabel="Todas"
             helperText="Filtra escribiendo el nombre de la ciudad."
             maxSuggestions={5}
+            maxLength={CITY_MAX_LENGTH}
           />
           <div className="field-group">
             <label htmlFor="consignation">Tipo de consignación</label>
@@ -107,13 +111,19 @@ export function FilterPanel({ defaultFilters, onChange, loadCities }: FilterPane
               id="min_price"
               className="w-full"
               type="number"
-              min={0}
+              min={PRICE_MIN}
+              max={PRICE_MAX}
+              step={0.01}
               value={filters.min_price ?? ''}
               onChange={(event) => {
                 const value = event.target.value;
+                const numericValue = Number(value);
                 const updated = {
                   ...filters,
-                  min_price: value ? Number(value) : undefined,
+                  min_price:
+                    value && !Number.isNaN(numericValue)
+                      ? Math.min(Math.max(numericValue, PRICE_MIN), PRICE_MAX)
+                      : undefined,
                   page: 1
                 };
                 setFilters(updated);
@@ -126,13 +136,19 @@ export function FilterPanel({ defaultFilters, onChange, loadCities }: FilterPane
               id="max_price"
               className="w-full"
               type="number"
-              min={0}
+              min={PRICE_MIN}
+              max={PRICE_MAX}
+              step={0.01}
               value={filters.max_price ?? ''}
               onChange={(event) => {
                 const value = event.target.value;
+                const numericValue = Number(value);
                 const updated = {
                   ...filters,
-                  max_price: value ? Number(value) : undefined,
+                  max_price:
+                    value && !Number.isNaN(numericValue)
+                      ? Math.min(Math.max(numericValue, PRICE_MIN), PRICE_MAX)
+                      : undefined,
                   page: 1
                 };
                 setFilters(updated);

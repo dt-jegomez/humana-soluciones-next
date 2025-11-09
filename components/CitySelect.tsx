@@ -19,6 +19,7 @@ interface CitySelectProps {
   disabled?: boolean;
   maxSuggestions?: number;
   debounceTime?: number;
+  maxLength?: number;
 }
 
 export function CitySelect({
@@ -36,7 +37,8 @@ export function CitySelect({
   required = false,
   disabled = false,
   maxSuggestions = 6,
-  debounceTime = 300
+  debounceTime = 300,
+  maxLength
 }: CitySelectProps) {
   const listboxId = useId();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -91,10 +93,17 @@ export function CitySelect({
     };
   }, []);
 
+  function truncate(value: string) {
+    if (typeof maxLength === 'number' && maxLength > 0) {
+      return value.slice(0, maxLength);
+    }
+    return value;
+  }
+
   function handleSelect(value?: string) {
-    const nextValue = value ?? '';
+    const nextValue = truncate(value ?? '');
     onQueryChange(nextValue);
-    onSelect?.(value);
+    onSelect?.(value ? truncate(value) : value);
     setIsOpen(false);
   }
 
@@ -103,7 +112,7 @@ export function CitySelect({
   }
 
   function handleInputChange(event: React.ChangeEvent<HTMLInputElement>) {
-    onQueryChange(event.target.value);
+    onQueryChange(truncate(event.target.value));
     setIsOpen(true);
   }
 
@@ -119,10 +128,13 @@ export function CitySelect({
           value={query}
           onChange={handleInputChange}
           onFocus={() => setIsOpen(true)}
+          role="combobox"
+          aria-autocomplete="list"
           aria-controls={`${listboxId}-listbox`}
           aria-expanded={isOpen}
           required={required}
           disabled={disabled}
+          maxLength={maxLength}
         />
         {isOpen && (
           <div

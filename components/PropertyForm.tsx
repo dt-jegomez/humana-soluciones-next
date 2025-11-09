@@ -24,6 +24,17 @@ interface FormState {
   images: string[];
 }
 
+const TITLE_MAX_LENGTH = 255;
+const CITY_MAX_LENGTH = 255;
+const ADDRESS_MAX_LENGTH = 255;
+const IMAGE_URL_MAX_LENGTH = 255;
+const INT16_MIN = 0;
+const INT16_MAX = 32767;
+const AREA_MIN = 0;
+const AREA_MAX = 99999999.99;
+const MONEY_MIN = 0;
+const MONEY_MAX = 999999999999.99;
+
 const EMPTY_FORM: FormState = {
   title: '',
   description: '',
@@ -59,6 +70,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const imageInputRefs = useRef<Array<HTMLInputElement | null>>([]);
   const redirectTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -69,14 +81,20 @@ export function PropertyForm({ property }: PropertyFormProps) {
     };
   }, []);
 
+  function clampNumber(value: number, { min, max }: { min: number; max: number }) {
+    if (Number.isNaN(value)) return min;
+    return Math.min(Math.max(value, min), max);
+  }
+
   function updateField<K extends keyof FormState>(field: K, value: FormState[K]) {
     setForm((current) => ({ ...current, [field]: value }));
   }
 
   function updateImage(index: number, value: string) {
+    const nextValue = value.slice(0, IMAGE_URL_MAX_LENGTH);
     setForm((current) => {
       const next = [...current.images];
-      next[index] = value;
+      next[index] = nextValue;
       return { ...current, images: next };
     });
   }
@@ -94,22 +112,40 @@ export function PropertyForm({ property }: PropertyFormProps) {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSubmitting(true);
     setSuccessMessage(null);
     setError(null);
 
+    const trimmedImages = form.images.map((url) => url.trim());
+    const hasPrimaryImage = Boolean(trimmedImages.length && trimmedImages[0]);
+
+    if (!hasPrimaryImage) {
+      setError('Debes ingresar al menos una imagen de la propiedad.');
+      imageInputRefs.current[0]?.focus();
+      return;
+    }
+
+    setSubmitting(true);
+
     const payload = {
-      title: form.title,
+      title: form.title.slice(0, TITLE_MAX_LENGTH),
       description: form.description,
-      city: form.city,
-      address: form.address,
-      bedrooms: form.bedrooms,
-      bathrooms: form.bathrooms,
-      area: form.area,
-      rent_price: form.rent_price || null,
-      sale_price: form.sale_price || null,
+      city: form.city.slice(0, CITY_MAX_LENGTH),
+      address: form.address.slice(0, ADDRESS_MAX_LENGTH),
+      bedrooms: clampNumber(form.bedrooms, { min: INT16_MIN, max: INT16_MAX }),
+      bathrooms: clampNumber(form.bathrooms, { min: INT16_MIN, max: INT16_MAX }),
+      area: clampNumber(form.area, { min: AREA_MIN, max: AREA_MAX }),
+      rent_price:
+        typeof form.rent_price === 'number'
+          ? clampNumber(form.rent_price, { min: MONEY_MIN, max: MONEY_MAX })
+          : null,
+      sale_price:
+        typeof form.sale_price === 'number'
+          ? clampNumber(form.sale_price, { min: MONEY_MIN, max: MONEY_MAX })
+          : null,
       consignation_type: form.consignation_type,
-      images: form.images.filter(Boolean).map((url) => ({ url }))
+      images: trimmedImages
+        .filter(Boolean)
+        .map((url) => ({ url: url.slice(0, IMAGE_URL_MAX_LENGTH) }))
     };
 
     try {
@@ -167,8 +203,11 @@ export function PropertyForm({ property }: PropertyFormProps) {
               id="title"
               className="w-full"
               required
+              maxLength={TITLE_MAX_LENGTH}
               value={form.title}
-              onChange={(event) => updateField('title', event.target.value)}
+              onChange={(event) =>
+                updateField('title', event.target.value.slice(0, TITLE_MAX_LENGTH))
+              }
             />
           </div>
           <CitySelect
@@ -176,9 +215,10 @@ export function PropertyForm({ property }: PropertyFormProps) {
             query={form.city}
             selectedValue={form.city}
             placeholder="Escribe el nombre de la ciudad"
-            onQueryChange={(value) => updateField('city', value)}
+            onQueryChange={(value) => updateField('city', value.slice(0, CITY_MAX_LENGTH))}
             loadCities={fetchCities}
             required
+            maxLength={CITY_MAX_LENGTH}
           />
         </div>
         <div className="field-group">
@@ -187,8 +227,11 @@ export function PropertyForm({ property }: PropertyFormProps) {
             id="address"
             className="w-full"
             required
+            maxLength={ADDRESS_MAX_LENGTH}
             value={form.address}
-            onChange={(event) => updateField('address', event.target.value)}
+            onChange={(event) =>
+              updateField('address', event.target.value.slice(0, ADDRESS_MAX_LENGTH))
+            }
           />
         </div>
         <div className="field-group">
@@ -213,9 +256,16 @@ export function PropertyForm({ property }: PropertyFormProps) {
               id="bedrooms"
               className="w-full"
               type="number"
-              min={0}
+              min={INT16_MIN}
+              max={INT16_MAX}
+              step={1}
               value={form.bedrooms}
-              onChange={(event) => updateField('bedrooms', Number(event.target.value))}
+              onChange={(event) =>
+                updateField(
+                  'bedrooms',
+                  clampNumber(Number(event.target.value), { min: INT16_MIN, max: INT16_MAX })
+                )
+              }
             />
           </div>
           <div className="field-group">
@@ -224,9 +274,16 @@ export function PropertyForm({ property }: PropertyFormProps) {
               id="bathrooms"
               className="w-full"
               type="number"
-              min={0}
+              min={INT16_MIN}
+              max={INT16_MAX}
+              step={1}
               value={form.bathrooms}
-              onChange={(event) => updateField('bathrooms', Number(event.target.value))}
+              onChange={(event) =>
+                updateField(
+                  'bathrooms',
+                  clampNumber(Number(event.target.value), { min: INT16_MIN, max: INT16_MAX })
+                )
+              }
             />
           </div>
           <div className="field-group">
@@ -235,9 +292,16 @@ export function PropertyForm({ property }: PropertyFormProps) {
               id="area"
               className="w-full"
               type="number"
-              min={0}
+              min={AREA_MIN}
+              max={AREA_MAX}
+              step={0.01}
               value={form.area}
-              onChange={(event) => updateField('area', Number(event.target.value))}
+              onChange={(event) =>
+                updateField(
+                  'area',
+                  clampNumber(Number(event.target.value), { min: AREA_MIN, max: AREA_MAX })
+                )
+              }
             />
           </div>
         </div>
@@ -264,10 +328,17 @@ export function PropertyForm({ property }: PropertyFormProps) {
               id="rent_price"
               className="w-full"
               type="number"
-              min={0}
+              min={MONEY_MIN}
+              max={MONEY_MAX}
+              step={0.01}
               value={form.rent_price ?? ''}
               onChange={(event) =>
-                updateField('rent_price', event.target.value ? Number(event.target.value) : null)
+                updateField(
+                  'rent_price',
+                  event.target.value
+                    ? clampNumber(Number(event.target.value), { min: MONEY_MIN, max: MONEY_MAX })
+                    : null
+                )
               }
             />
           </div>
@@ -277,10 +348,17 @@ export function PropertyForm({ property }: PropertyFormProps) {
               id="sale_price"
               className="w-full"
               type="number"
-              min={0}
+              min={MONEY_MIN}
+              max={MONEY_MAX}
+              step={0.01}
               value={form.sale_price ?? ''}
               onChange={(event) =>
-                updateField('sale_price', event.target.value ? Number(event.target.value) : null)
+                updateField(
+                  'sale_price',
+                  event.target.value
+                    ? clampNumber(Number(event.target.value), { min: MONEY_MIN, max: MONEY_MAX })
+                    : null
+                )
               }
             />
           </div>
@@ -310,6 +388,10 @@ export function PropertyForm({ property }: PropertyFormProps) {
                   id={`image-${index}`}
                   className="w-full"
                   placeholder="https://..."
+                  maxLength={IMAGE_URL_MAX_LENGTH}
+                  ref={(element) => {
+                    imageInputRefs.current[index] = element;
+                  }}
                   value={url}
                   onChange={(event) => updateImage(index, event.target.value)}
                 />
