@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createProperty, fetchCities, updateProperty } from '@/lib/api';
 import type { ConsignationType, Property } from '@/lib/types';
@@ -59,6 +59,15 @@ export function PropertyForm({ property }: PropertyFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const redirectTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (redirectTimeout.current) {
+        clearTimeout(redirectTimeout.current);
+      }
+    };
+  }, []);
 
   function updateField<K extends keyof FormState>(field: K, value: FormState[K]) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -106,7 +115,13 @@ export function PropertyForm({ property }: PropertyFormProps) {
     try {
       if (property) {
         await updateProperty(property.id, payload);
-        setSuccessMessage('Inmueble actualizado correctamente.');
+        setSuccessMessage('Inmueble actualizado correctamente. Serás redirigido en 10 segundos.');
+        if (redirectTimeout.current) {
+          clearTimeout(redirectTimeout.current);
+        }
+        redirectTimeout.current = setTimeout(() => {
+          router.back();
+        }, 10000);
       } else {
         const created = await createProperty(payload);
         setSuccessMessage('Inmueble creado correctamente.');

@@ -76,8 +76,11 @@ export async function fetchProperties(
   return http<PaginatedResponse<Property>>(`/api/properties${query}`);
 }
 
+type PropertyResponse = Property | { data: Property };
+
 export async function fetchProperty(id: number): Promise<Property> {
-  return http<Property>(`/api/properties/${id}`);
+  const response = await http<PropertyResponse>(`/api/properties/${id}`);
+  return 'data' in response ? response.data : response;
 }
 
 interface PropertyPayload {
