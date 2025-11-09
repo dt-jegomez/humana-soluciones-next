@@ -24,7 +24,6 @@
         "./*"
       ]
     },
-    "types": ["vitest"],
     "plugins": [
       {
         "name": "next"

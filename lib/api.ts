@@ -94,11 +94,15 @@ interface PropertyPayload {
   images: { url: string }[];
 }
 
+type CreatePropertyResponse = Property | { data: Property };
+
 export async function createProperty(payload: PropertyPayload): Promise<Property> {
-  return http<Property>(`/api/properties`, {
+  const response = await http<CreatePropertyResponse>(`/api/properties`, {
     method: 'POST',
     body: JSON.stringify(payload)
   });
+
+  return 'data' in response ? response.data : response;
 }
 
 export async function updateProperty(
